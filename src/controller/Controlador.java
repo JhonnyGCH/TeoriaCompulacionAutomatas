@@ -67,7 +67,7 @@ public class Controlador implements ActionListener
         salida.pack();
         salida.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         salida.setLocationRelativeTo(null);
-        salida.txtAFD.setText(afnd.toString()+ "\n" + afnd.proceso);
+        salida.txtAFD.setText(afnd.toString()+ "\n" + afnd.getProceso());
         salida.setVisible(true);
         salida.btnVolver.addActionListener(this);
         

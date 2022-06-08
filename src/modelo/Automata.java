@@ -17,7 +17,7 @@ public class Automata
     private final List<String> simbolos;
     private List<Estado> estados;
     private boolean deterministico;
-    public String proceso = "PROCESO:\n";
+    private String proceso;
     
     //Constructor por Defecto
     public Automata(){
@@ -27,6 +27,7 @@ public class Automata
     
     public Automata(String estados, String simbolos, String inicial, String terminal)
     {
+         this.proceso = "PROCESO:\n\n";
         //Se inicializan los contenedores
         this.estados = new ArrayList<>();
         this.simbolos = new ArrayList<>();
@@ -35,20 +36,20 @@ public class Automata
         this.simbolos.addAll(Arrays.asList(simbolos.split(",")));
         
         //Se crea el estado inicial
-        Estado estadoInicial = new Estado(inicial, this.simbolos.size());
+        Estado estadoInicial = new Estado(inicial.toUpperCase(), this.simbolos.size());
         estadoInicial.setInicial();
         this.estados.add(estadoInicial);
         
         //Se crea el estado terminal
-        Estado estadoTerminal = new Estado(terminal, this.simbolos.size());
+        Estado estadoTerminal = new Estado(terminal.toUpperCase(), this.simbolos.size());
         estadoTerminal.setTerminal();
         this.estados.add(estadoTerminal);
                 
         //Se crean los estados NO iniciales y NO terminales
         String restantes [] = estados.split(",");
         for(String i : restantes)
-            if(!i.equals(inicial) && !i.equals(terminal))
-                this.estados.add(new Estado(i, this.simbolos.size()));
+            if(!i.toUpperCase().equals(inicial.toUpperCase()) && !i.toUpperCase().equals(terminal.toUpperCase()))
+                this.estados.add(new Estado(i.toUpperCase(), this.simbolos.size()));
         
         //Se establece por defecto como deterministico
         this.deterministico = true;        
@@ -71,14 +72,12 @@ public class Automata
     private String ordenar(String data)
     {
         String [] aux = data.split(",");
-        
         //Se evalua la condicion de deterministico
         if(aux.length == 1)
             return data;
         
         this.deterministico = false;
         Arrays.sort(aux);
-        
         String valor = aux[0];
         for(int i = 1; i<aux.length; i++)
             valor += "," + aux[i];
@@ -96,6 +95,7 @@ public class Automata
         Estado inicial = this.estados.get(0);
         Queue<String> cola = new ArrayDeque<>();
         Queue<String> historial = new ArrayDeque<>();
+        
         historial.add(inicial.getNombre() + ",");
         cola.add(inicial.getNombre() + ",");
         
@@ -104,13 +104,13 @@ public class Automata
             String nombre = cola.poll();
             String estadosCombinados [] = nombre.split(",");
             Estado nuevo = new Estado(getNombre(estadosCombinados), this.simbolos.size());
-            proceso += "Estado: " + nuevo.getNombre();
             List<Estado> temp = getEstados(estadosCombinados);
+                       
+            agregarProceso(nuevo.getNombre(), temp);
+            
             for(int cnt = 0; cnt<this.simbolos.size(); cnt++){
-                proceso +="\n";
-                HashSet<String> estadosOrdenados = new HashSet<>();
+               HashSet<String> estadosOrdenados = new HashSet<>();
                 for(Estado i : temp){
-                    proceso += i.toString();
                     if(i.isTerminal()) nuevo.setTerminal();
                     String [] valores = i.get(cnt).split(",");
                     estadosOrdenados.addAll(Arrays.asList(valores));
@@ -128,11 +128,28 @@ public class Automata
             }
             nuevosEstados.add(nuevo);
         }
-        System.out.println(proceso);
         nuevosEstados.get(0).setInicial();
         afd.setEstados(nuevosEstados);
         afd.deterministico = true;
         return afd; 
+    }
+    
+    private void agregarProceso(String nombre, List<Estado> x){
+        this.proceso += "Estado " + nombre + ":\n";
+        x.forEach((i) -> {
+            this.proceso += i.toString();
+        });
+        
+        this.proceso += "\n";
+    }
+    
+    private Estado getEstado(String x){
+        for(Estado i : estados){
+            if(i.getNombre().equals(x)){
+                return i;
+            }
+        }
+        return null;
     }
     
     public boolean existeEstado(String otro){
@@ -173,6 +190,10 @@ public class Automata
 
     public void setEstados(List<Estado> estados) {
         this.estados = estados;
+    }
+
+    public String getProceso() {
+        return proceso;
     }
     
     @Override
